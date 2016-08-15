@@ -29,6 +29,7 @@ canvas.width = w;
 canvas.height = h;
 let context = canvas.getContext('2d');
 let dir = 0;
+let topDown = false;
 let player = { x:30, y: 420, vx: 0, vy: 0, jumpHeight: 100, bAcross: 5, bDown: 9, bSize: 10 };
 
 player.blocksMain = [
@@ -264,7 +265,7 @@ const render = (timestamp) => {
   // get correct x,y based on transform etc
   // only do this every few frames
   if (tick) {
-    amount = Math.floor(0.01) + ~~(Math.random() * 1.5);
+    amount = Math.floor(0.01) + ~~(Math.random() * 1.2);
     var imgData = context.getImageData(0, 0, w, h);
     var shiftAmountR = 10 * amount;
     var shiftAmountG = 5 * amount;
