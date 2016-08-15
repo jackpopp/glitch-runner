@@ -208,8 +208,11 @@ const render = (timestamp) => {
   currentY = startY;
 
   state.forEach((block, index) => {
-    context.fillStyle = block === '0' ?  'black' : '#' + player.colours[block];
-    context.fillRect( (currentX + player.vx), currentY - player.vy, player.bSize, player.bSize);
+
+    if (block !== 0) {
+      context.fillStyle = block === '0' ?  'black' : '#' + player.colours[block];
+      context.fillRect( (currentX + player.vx), currentY - player.vy, player.bSize, player.bSize);
+    }
 
     if ((index+1) % player.bAcross === 0) {
       // new line
@@ -225,9 +228,12 @@ const render = (timestamp) => {
   startY = 100;
   currentX = startX;
   currentY = startY;
-  player.blocksTopDown.forEach((block, index) => {
-    context.fillStyle = block === '0' ?  'black' : '#' + player.colours[block];
-    context.fillRect( (currentX + player.vx), currentY - player.vy, player.bSize, player.bSize);
+  player.blocksTop.forEach((block, index) => {
+
+    if (block !== 0) {
+      context.fillStyle = block === '0' ?  'black' : '#' + player.colours[block];
+      context.fillRect( (currentX + player.vx), currentY - player.vy, player.bSize, player.bSize);
+    }
 
     if ((index+1) % 4 === 0) {
       // new line
@@ -238,7 +244,7 @@ const render = (timestamp) => {
     }
   })
 
-  context.fillStyle = 'white';
+  context.fillStyle = '#79ef7d';
 
   // paint all these as one?
   context.fillRect(50, 520, 20, 20);
@@ -258,7 +264,7 @@ const render = (timestamp) => {
   // get correct x,y based on transform etc
   // only do this every few frames
   if (tick) {
-    amount = Math.floor(0.01) + ~~(Math.random() * 1.1);
+    amount = Math.floor(0.01) + ~~(Math.random() * 1.5);
     var imgData = context.getImageData(0, 0, w, h);
     var shiftAmountR = 10 * amount;
     var shiftAmountG = 5 * amount;
