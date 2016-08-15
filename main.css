@@ -1,0 +1,57 @@
+
+body {
+  background: #777;
+}
+.screen {
+  width: 800px;
+  height: 600px;
+  background: black;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  position: relative;
+}
+
+.screen:befre {
+  display: block;
+  content: '';
+  background: white;
+  width: 90%;
+  height: 90%;
+  position: absolute;
+  left: 5%;
+  top: 5%;
+  border-radius: 50%;
+  opacity: 0.03;
+}
+
+.screen:afer {  
+  display: block;
+  content: '';
+  background: white;
+  width: 70%;
+  height: 70%;
+  position: absolute;
+  left: 15%;
+  top: 15%;
+  border-radius: 50%;
+  opacity: 0.02;
+}
+
+.c {
+  position: absolute;
+}
+
+.bar {
+  width: 100%;
+  height: 2px;
+  border-top: 2px solid white;
+  border-bottom: 2px solid white;
+  margin-bottom: 2px;
+  opacity:0.2;
+  position: relative;
+}
+
+.bar.light {
+  opacity: 0.19;
+}
