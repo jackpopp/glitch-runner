@@ -7,23 +7,17 @@ for (let i = 0; i < 75; i++) {
   screen.appendChild(node);
 }
 
-let index = 0;
+let barIndex = 0;
 let all = document.querySelectorAll('.bar');
 let total = all.length;
 let last = null;
-
-setInterval(() => {
-  last = index;
- 
-  if (index === total - 1) {
-    index = 0;
-  } else {
-    index++;
-  }
-  
-  all[index].classList.add('light');
+let crt = () => {
+  last = barIndex;
+  (barIndex === total - 1) ? barIndex = 0 : barIndex++;  
+  all[barIndex].classList.add('light');
   all[last].classList.remove('light');
-}, 15);
+}
+
 /* end make our screen */
 
 /* start game */
@@ -35,7 +29,7 @@ canvas.width = w;
 canvas.height = h;
 let context = canvas.getContext('2d');
 let dir = 0;
-let player = { x:30, y: 420, vx: 0, vy: 0, bAcross: 5, bDown: 9, bSize: 10 };
+let player = { x:30, y: 420, vx: 0, vy: 0, jumpHeight: 100, bAcross: 5, bDown: 9, bSize: 10 };
 
 player.blocksMain = [
   '0','0','p','0','0',
@@ -49,6 +43,10 @@ player.blocksMain = [
   'b','0','b','0','0',
   'd','t','d','t','0',
 ];
+
+player.spriteMain = '5:9:00p0000r000rrr00rprp00r0000r000bbb00b0b0b0b00dtdt0';
+player.spiteDown = '5:9:0000000p0000r000rrr00rprp00r000bbb00b0b0b0b00dtdt0';
+player.spriteWalk = '5:9:0000000p0000r000rrr00rprp00r000bbb0bb0b0d00b0t00dt';
 
 player.blocksDown = [
   '0','0','0','0','0',
@@ -75,6 +73,33 @@ player.blocksWalk = [
   'd','0','0','b','0',
   't','0','0','d','t',
 ];
+
+/* 4x5 */
+player.blocksTop = [
+  '0' ,'0' ,'r', 'p',
+  '0' ,'0' ,'r', 'd',
+  '0' ,'0' ,'p', '0',
+  '0' ,'0' ,'r', 'd',
+  '0' ,'0' ,'r', 'p'
+];
+
+player.blocksTopWalkOne = [
+  '0' ,'0' ,'r', 'p',
+  '0' ,'0' ,'r', 'd',
+  '0' ,'0' ,'p', '0',
+  '0' ,'0' ,'r', 'd',
+  '0' ,'0' ,'r', 'p'
+];
+
+player.blocksTopWalkThree = [
+  '0' ,'0' ,'r', 'p',
+  '0' ,'0' ,'r', 'd',
+  '0' ,'0' ,'p', '0',
+  '0' ,'0' ,'r', 'd',
+  '0' ,'0' ,'r', 'p'
+];
+
+//player.blocksTopDown = '2:5:rprdp0rdrp';
 
 
 player.colours = {
@@ -121,12 +146,13 @@ let lastTimestamp = null;
 let tick = false;
 
 const render = (timestamp) => {
+  crt();
 
-  if (player.vy < 50 && player.jumping) {
+  if (player.vy < player.jumpHeight && player.jumping) {
     player.vy+=3
   } 
 
-  if (player.vy > 50 && player.jumping) {
+  if (player.vy > player.jumpHeight && player.jumping) {
     player.jumping = false;
   }
 
@@ -163,13 +189,6 @@ const render = (timestamp) => {
   context.translate(cx, 0);
   //context.fillRect(player.x, player.y, 20, 20);
 
-  /* start top left down to bottom right moving from left to right top to bottom */
-  startX = (player.bDown * player.bSize) - player.x;
-  startY = player.y;
-
-  currentX = startX;
-  currentY = startY;
-
   var state;
 
   if (tick) {
@@ -181,6 +200,12 @@ const render = (timestamp) => {
       state = player.blocksDown;
     }
   }
+
+  /* start top left down to bottom right moving from left to right top to bottom */
+  startX = (player.bDown * player.bSize) - player.x;
+  startY = player.y;
+  currentX = startX;
+  currentY = startY;
 
   state.forEach((block, index) => {
     context.fillStyle = block === '0' ?  'black' : '#' + player.colours[block];
@@ -195,15 +220,71 @@ const render = (timestamp) => {
     }
   });
 
+  /* for testing top down*/
+  startX = (5 * player.bSize) - player.x;
+  startY = 100;
+  currentX = startX;
+  currentY = startY;
+  player.blocksTopDown.forEach((block, index) => {
+    context.fillStyle = block === '0' ?  'black' : '#' + player.colours[block];
+    context.fillRect( (currentX + player.vx), currentY - player.vy, player.bSize, player.bSize);
+
+    if ((index+1) % 4 === 0) {
+      // new line
+      currentX = startX;
+      currentY += player.bSize;
+    } else {
+      currentX += player.bSize;
+    }
+  })
+
   context.fillStyle = 'white';
 
-  context.fillRect(150, 500, 20, 20);
-  context.fillRect(250, 500, 20, 20);
-  context.fillRect(450, 500, 20, 20);
-  context.fillRect(550, 500, 20, 20);
+  // paint all these as one?
+  context.fillRect(50, 520, 20, 20);
+  context.fillRect(70, 520, 60, 40);
+  context.fillRect(130, 520, 350, 20);
+  context.fillRect(480, 520, 40, 40);
+  context.fillRect(520, 520, 30, 30);
+  context.fillRect(550, 520, 20, 20);
 
-  context.fillRect(850, 500, 20, 20);
+  context.fillRect(750, 520, 100, 20);
+  context.fillRect(850, 520, 120, 30);
   context.setTransform(1, 0, 0, 1, 0, 0);
+
+  // glitch it
+  //var screen = canvas.toDataURL();
+  //console.log(screen);
+  // get correct x,y based on transform etc
+  // only do this every few frames
+  if (tick) {
+    amount = Math.floor(0.01) + ~~(Math.random() * 1.1);
+    var imgData = context.getImageData(0, 0, w, h);
+    var shiftAmountR = 10 * amount;
+    var shiftAmountG = 5 * amount;
+    var shiftAmountB = 5 * amount;
+    for (var i = 0; i < imgData.data.length; i += 4) {
+        var r = imgData.data[i];
+        imgData.data[i] = 0;
+        var destIdxR = i - (w * (4 * shiftAmountR)) - shiftAmountR * 4;
+        if (destIdxR > 0) {
+            imgData.data[destIdxR] = r;
+        }
+        var g = imgData.data[i + 1];
+        imgData.data[i + 1] = 0;
+        var destIdxG = i - (w * (4 * shiftAmountG)) + 1;
+        if (destIdxG > 0) {
+            imgData.data[destIdxG] = g;
+        }
+        var b = imgData.data[i + 2];
+        var destIdxB = i - (4 * shiftAmountB) + 2;
+        imgData.data[i + 2] = 0;
+        if (destIdxB > 0 && destIdxB < imgData.data.length) {
+            imgData.data[destIdxB] = b;
+        }
+    }
+    context.putImageData(imgData, 0, 0);
+  }
 
   requestAnimationFrame(render);
 }
