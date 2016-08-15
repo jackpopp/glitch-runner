@@ -30,7 +30,7 @@ canvas.height = h;
 let context = canvas.getContext('2d');
 let dir = 0;
 let topDown = false;
-let player = { x:30, y: 420, vx: 0, vy: 0, jumpHeight: 100, bAcross: 5, bDown: 9, bSize: 10 };
+let player = { x:30, y: 420, baseY: 420, topDownY: 0, vx: 0, vy: 0, jumpHeight: 100, bAcross: 5, bDown: 9, bSize: 10 };
 
 player.blocksMain = [
   '0','0','p','0','0',
@@ -115,6 +115,8 @@ player.colours = {
 let left = 37;
 let space = 32;
 let right = 39; 
+let up = 38;
+let down = 40;
 let g = 71;
 let lastKey;
 
@@ -132,6 +134,14 @@ document.addEventListener('keydown', (e) => {
     player.jumping = true;
     //player.vy += 50;
     // want to count up here
+  }
+
+  if (e.keyCode === up && topDown === true) {
+    player.topDownY-=5;
+  }
+
+  if (e.keyCode === down && topDown === true) {
+    player.topDownY+=5;
   }
 
   if (e.keyCode === g) {
@@ -250,23 +260,25 @@ const render = (timestamp) => {
   } else {
 
     /* for testing top down*/
-    startX = (5 * player.bSize) - player.bSize;
-    startY = 280;
+    let blockSize = player.bSize + (player.vy/10);
+
+    startX = (5 * blockSize) - blockSize;
+    startY = 280 + player.topDownY;
     currentX = startX;
     currentY = startY;
     player.blocksTop.forEach((block, index) => {
 
       if (block !== '0') {
         context.fillStyle = '#'+player.colours[block];
-        context.fillRect( (currentX + player.vx), currentY - player.vy, player.bSize, player.bSize);
+        context.fillRect( (currentX + player.vx), currentY - player.vy, blockSize, blockSize);
       }
 
       if ((index+1) % 5 === 0) {
         // new line
         currentX = startX;
-        currentY += player.bSize;
+        currentY += blockSize;
       } else {
-        currentX += player.bSize;
+        currentX += blockSize;
       }
     })
   }
