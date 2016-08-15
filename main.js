@@ -77,27 +77,27 @@ player.blocksWalk = [
 
 /* 4x5 */
 player.blocksTop = [
-  '0' ,'0' ,'r', 'p',
-  '0' ,'0' ,'r', 'd',
-  '0' ,'0' ,'p', '0',
-  '0' ,'0' ,'r', 'd',
-  '0' ,'0' ,'r', 'p'
+  '0' ,'0' ,'r', 'p', '0',
+  '0' ,'0' ,'r', 'd', '0',
+  '0' ,'0' ,'p', '0', '0',
+  '0' ,'0' ,'r', 'd', '0',
+  '0' ,'0' ,'r', 'p', '0'
 ];
 
 player.blocksTopWalkOne = [
-  '0' ,'0' ,'r', 'p',
-  '0' ,'0' ,'r', 'd',
-  '0' ,'0' ,'p', '0',
-  '0' ,'0' ,'r', 'd',
-  '0' ,'0' ,'r', 'p'
+  '0' ,'0' ,'r', 'p', '0',
+  '0' ,'0' ,'r', 'd', '0',
+  '0' ,'0' ,'p', '0', '0',
+  '0' ,'0' ,'r', 'd', '0',
+  '0' ,'0' ,'r', 'p', '0'
 ];
 
 player.blocksTopWalkThree = [
-  '0' ,'0' ,'r', 'p',
-  '0' ,'0' ,'r', 'd',
-  '0' ,'0' ,'p', '0',
-  '0' ,'0' ,'r', 'd',
-  '0' ,'0' ,'r', 'p'
+  '0' ,'0' ,'r', 'p', '0',
+  '0' ,'0' ,'r', 'd', '0',
+  '0' ,'0' ,'p', '0', '0',
+  '0' ,'0' ,'r', 'd', '0',
+  '0' ,'0' ,'r', 'p', '0'
 ];
 
 //player.blocksTopDown = '2:5:rprdp0rdrp';
@@ -235,7 +235,7 @@ const render = (timestamp) => {
     state.forEach((block, index) => {
 
       if (block !== '0') {
-        context.fillStyle = block === '0' ?  'black' : '#' + player.colours[block];
+        context.fillStyle = '#'+player.colours[block];
         context.fillRect( (currentX + player.vx), currentY - player.vy, player.bSize, player.bSize);
       }
 
@@ -250,18 +250,18 @@ const render = (timestamp) => {
   } else {
 
     /* for testing top down*/
-    startX = (5 * player.bSize);
+    startX = (5 * player.bSize) - player.bSize;
     startY = 280;
     currentX = startX;
     currentY = startY;
     player.blocksTop.forEach((block, index) => {
 
       if (block !== '0') {
-        context.fillStyle = block === '0' ?  'black' : '#' + player.colours[block];
+        context.fillStyle = '#'+player.colours[block];
         context.fillRect( (currentX + player.vx), currentY - player.vy, player.bSize, player.bSize);
       }
 
-      if ((index+1) % 4 === 0) {
+      if ((index+1) % 5 === 0) {
         // new line
         currentX = startX;
         currentY += player.bSize;
