@@ -133,6 +133,10 @@ document.addEventListener('keydown', (e) => {
     //player.vy += 50;
     // want to count up here
   }
+
+  if (e.keyCode === g) {
+    topDown = (topDown === true) ? false : true;
+  }
 });
 
 document.addEventListener('keyup', (e) => {
@@ -167,15 +171,15 @@ const render = (timestamp) => {
   }
 
   if (dir === 1) {
-    cx -=3;
+    cx -=2;
     //player.x +=1;
-    player.vx +=3;
+    player.vx +=2;
   }
 
   if (dir === -1) {
-    cx +=3;
+    cx +=2;
     //player.x -=1;
-    player.vx -=3;
+    player.vx -=2;
   }
 
 
@@ -202,62 +206,70 @@ const render = (timestamp) => {
     }
   }
 
-  /* start top left down to bottom right moving from left to right top to bottom */
-  startX = (player.bDown * player.bSize) - player.x;
-  startY = player.y;
-  currentX = startX;
-  currentY = startY;
-
-  state.forEach((block, index) => {
-
-    if (block !== 0) {
-      context.fillStyle = block === '0' ?  'black' : '#' + player.colours[block];
-      context.fillRect( (currentX + player.vx), currentY - player.vy, player.bSize, player.bSize);
-    }
-
-    if ((index+1) % player.bAcross === 0) {
-      // new line
-      currentX = startX;
-      currentY += player.bSize;
-    } else {
-      currentX += player.bSize;
-    }
-  });
-
-  /* for testing top down*/
-  startX = (5 * player.bSize) - player.x;
-  startY = 100;
-  currentX = startX;
-  currentY = startY;
-  player.blocksTop.forEach((block, index) => {
-
-    if (block !== 0) {
-      context.fillStyle = block === '0' ?  'black' : '#' + player.colours[block];
-      context.fillRect( (currentX + player.vx), currentY - player.vy, player.bSize, player.bSize);
-    }
-
-    if ((index+1) % 4 === 0) {
-      // new line
-      currentX = startX;
-      currentY += player.bSize;
-    } else {
-      currentX += player.bSize;
-    }
-  })
-
   context.fillStyle = '#79ef7d';
+  // build platforms
+  if (topDown === false) {
+    // paint all these as one?
+    context.fillRect(50, 520, 20, 20);
+    context.fillRect(70, 520, 60, 40);
+    context.fillRect(130, 520, 350, 20);
+    context.fillRect(480, 520, 40, 40);
+    context.fillRect(520, 520, 30, 30);
+    context.fillRect(550, 520, 20, 20);
+    context.fillRect(750, 520, 100, 20);
+    context.fillRect(850, 520, 120, 30);
+  } else {
+    context.fillRect(50, 200, 500, 200);
+    context.fillRect(750, 200, 220, 200);
+  }
 
-  // paint all these as one?
-  context.fillRect(50, 520, 20, 20);
-  context.fillRect(70, 520, 60, 40);
-  context.fillRect(130, 520, 350, 20);
-  context.fillRect(480, 520, 40, 40);
-  context.fillRect(520, 520, 30, 30);
-  context.fillRect(550, 520, 20, 20);
-
-  context.fillRect(750, 520, 100, 20);
-  context.fillRect(850, 520, 120, 30);
   context.setTransform(1, 0, 0, 1, 0, 0);
+
+  if (topDown === false) {
+    /* start top left down to bottom right moving from left to right top to bottom */
+    startX = (player.bDown * player.bSize) - player.x;
+    startY = player.y;
+    currentX = startX;
+    currentY = startY;
+
+    state.forEach((block, index) => {
+
+      if (block !== '0') {
+        context.fillStyle = block === '0' ?  'black' : '#' + player.colours[block];
+        context.fillRect( (currentX + player.vx), currentY - player.vy, player.bSize, player.bSize);
+      }
+
+      if ((index+1) % player.bAcross === 0) {
+        // new line
+        currentX = startX;
+        currentY += player.bSize;
+      } else {
+        currentX += player.bSize;
+      }
+    });
+  } else {
+
+    /* for testing top down*/
+    startX = (5 * player.bSize);
+    startY = 280;
+    currentX = startX;
+    currentY = startY;
+    player.blocksTop.forEach((block, index) => {
+
+      if (block !== '0') {
+        context.fillStyle = block === '0' ?  'black' : '#' + player.colours[block];
+        context.fillRect( (currentX + player.vx), currentY - player.vy, player.bSize, player.bSize);
+      }
+
+      if ((index+1) % 4 === 0) {
+        // new line
+        currentX = startX;
+        currentY += player.bSize;
+      } else {
+        currentX += player.bSize;
+      }
+    })
+  }
 
   // glitch it
   //var screen = canvas.toDataURL();
