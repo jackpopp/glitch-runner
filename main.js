@@ -227,10 +227,21 @@ const render = (timestamp) => {
     context.fillRect(520, 520, 30, 30);
     context.fillRect(550, 520, 20, 20);
     context.fillRect(750, 520, 100, 20);
-    context.fillRect(850, 520, 120, 30);
+    context.fillRect(850, 520, 120, 40);
   } else {
     context.fillRect(50, 200, 500, 200);
     context.fillRect(750, 200, 220, 200);
+  }
+
+  // walls 
+  context.fillStyle = 'grey'
+  if (topDown === false) {
+    context.fillRect(300, 320, 30, 200);
+    context.fillRect(820, 500, 30, 20);
+  } else {
+    // the x for walls on top down should be approx 20px closer as our top down sprite is narrower
+    context.fillRect(280, 270, 30, 70);
+    context.fillRect(800, 200, 30, 200);
   }
 
   context.setTransform(1, 0, 0, 1, 0, 0);
