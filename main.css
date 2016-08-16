@@ -2,7 +2,7 @@
 body {
   background: #777;
 }
-.screen {
+.s {
   width: 800px;
   height: 600px;
   background: black;
@@ -12,7 +12,7 @@ body {
   position: relative;
 }
 
-.screen:befre {
+.s:befre {
   display: block;
   content: '';
   background: white;
@@ -25,7 +25,7 @@ body {
   opacity: 0.03;
 }
 
-.screen:afer {  
+.s:afer {  
   display: block;
   content: '';
   background: white;

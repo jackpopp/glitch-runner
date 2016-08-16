@@ -1,10 +1,10 @@
 /* start make our screen */
-let screen = document.querySelector('.screen');
+let main = document.querySelector('.s');
 
 for (let i = 0; i < 75; i++) {
   let node = document.createElement('div');
   node.classList.add('bar');
-  screen.appendChild(node);
+  main.appendChild(node);
 }
 
 let barIndex = 0;
@@ -31,6 +31,12 @@ let context = canvas.getContext('2d');
 let dir = 0;
 let topDown = false;
 let player = { x:30, y: 420, baseY: 420, topDownY: 0, vx: 0, vy: 0, jumpHeight: 100, bAcross: 5, bDown: 9, bSize: 10 };
+
+/**
+
+  PLAYERS
+
+**/
 
 player.blocksMain = [
   '0','0','p','0','0',
@@ -111,6 +117,15 @@ player.colours = {
   't': '703c3c'
 }
 
+/**
+
+  LEVEL STUFF
+
+**/
+
+let sideLevel = {};
+let topDownLevel = {};
+
 /* input */
 let left = 37;
 let space = 32;
@@ -156,7 +171,7 @@ document.addEventListener('keyup', (e) => {
 });
 
 
-let = cx = 0;
+let cx = 0;
 let lastTimestamp = null;
 let tick = false;
 
@@ -192,6 +207,8 @@ const render = (timestamp) => {
     player.vx -=2;
   }
 
+  // collide here
+
 
   context.save();
   context.setTransform(1, 0, 0, 1, 0, 0);
@@ -199,10 +216,7 @@ const render = (timestamp) => {
   // Restore the transform
   context.restore();
 
-  context.fillStyle = 'white';
-
   context.translate(cx, 0);
-  //context.fillRect(player.x, player.y, 20, 20);
 
   var state;
 
@@ -216,6 +230,8 @@ const render = (timestamp) => {
     }
   }
 
+  context.shadowBlur = 10;
+  context.shadowColor = "#79ef7d";
   context.fillStyle = '#79ef7d';
   // build platforms
   if (topDown === false) {
@@ -234,7 +250,8 @@ const render = (timestamp) => {
   }
 
   // walls 
-  context.fillStyle = 'grey'
+  context.shadowColor = "#55b958";
+  context.fillStyle = '#55b958'
   if (topDown === false) {
     context.fillRect(300, 320, 30, 200);
     context.fillRect(820, 500, 30, 20);
@@ -244,6 +261,7 @@ const render = (timestamp) => {
     context.fillRect(800, 200, 30, 200);
   }
 
+  context.shadowBlur = 0;
   context.setTransform(1, 0, 0, 1, 0, 0);
 
   if (topDown === false) {
@@ -271,17 +289,17 @@ const render = (timestamp) => {
   } else {
 
     /* for testing top down*/
-    let blockSize = player.bSize + (player.vy/10);
+    let blockSize = player.bSize + (player.vy/20);
 
-    startX = (5 * blockSize) - blockSize;
-    startY = 280 + player.topDownY;
+    startX = ((5 * blockSize) - blockSize);// - (player.vy/2);
+    startY = (280 + player.topDownY);
     currentX = startX;
     currentY = startY;
     player.blocksTop.forEach((block, index) => {
 
       if (block !== '0') {
         context.fillStyle = '#'+player.colours[block];
-        context.fillRect( (currentX + player.vx), currentY - player.vy, blockSize, blockSize);
+        context.fillRect( (currentX), currentY, blockSize, blockSize);
       }
 
       if ((index+1) % 5 === 0) {
@@ -299,8 +317,9 @@ const render = (timestamp) => {
   //console.log(screen);
   // get correct x,y based on transform etc
   // only do this every few frames
-  if (tick) {
+  if (tick === 'turnedoff') {
     amount = Math.floor(0.01) + ~~(Math.random() * 1.2);
+
     var imgData = context.getImageData(0, 0, w, h);
     var shiftAmountR = 10 * amount;
     var shiftAmountG = 5 * amount;
