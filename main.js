@@ -30,7 +30,7 @@ canvas.height = h;
 let context = canvas.getContext('2d');
 let dir = 0;
 let topDown = false;
-let player = { x:30, y: 420, baseY: 420, topDownY: 0, vx: 0, vy: 0, jumpHeight: 100, bAcross: 5, bDown: 9, bSize: 10 };
+let player = { x:30, y: 420, baseY: 420, baseTopDownY: 280, topDownY: 0, vx: 0, vy: 0, jumpHeight: 150, bAcross: 5, bDown: 9, bSize: 10 };
 
 /**
 
@@ -118,13 +118,36 @@ player.colours = {
 }
 
 /**
-
   LEVEL STUFF
-
 **/
 
-let sideLevel = {};
-let topDownLevel = {};
+//let sideLevel = {};
+//let topDownLevel = {};
+let levelBlock = (x, y, w, h) => { return { x, y, w, h } }
+
+let sideLevel = [
+  levelBlock(50, 520, 20, 20),
+  levelBlock(70, 520, 60, 40),
+  levelBlock(130, 520, 350, 20),
+  levelBlock(480, 520, 40, 40),
+  levelBlock(520, 520, 30, 30),
+  levelBlock(550, 520, 20, 20),
+  levelBlock(700, 520, 100, 20),
+  levelBlock(800, 520, 120, 40)
+];
+let sideWalls = [
+  levelBlock(300, 320, 30, 200),
+  levelBlock(770, 500, 30, 20)
+];
+
+let topDownLevel = [
+  levelBlock(50, 200, 500, 200),
+  levelBlock(700, 200, 220, 200)
+];
+let topDownWalls = [
+  levelBlock(300, 270, 30, 70),
+  levelBlock(750, 200, 30, 200)
+];
 
 /* input */
 let left = 37;
@@ -177,12 +200,11 @@ let tick = false;
 
 const render = (timestamp) => {
   crt();
-
-  if (player.vy < player.jumpHeight && player.jumping) {
+  if (player.vy <= player.jumpHeight && player.jumping) {
     player.vy+=3
   } 
 
-  if (player.vy > player.jumpHeight && player.jumping) {
+  if (player.vy >= player.jumpHeight && player.jumping) {
     player.jumping = false;
   }
 
@@ -207,8 +229,47 @@ const render = (timestamp) => {
     player.vx -=2;
   }
 
-  // collide here
+  // collision detection here
+  let walls = (topDown === false) ? sideWalls : topDownWalls;
 
+  // walls
+  let hit = walls.some((wall) => {
+    // need front and back
+    // need to check y
+    // 20px diff for top down view figure that out
+
+    // Y - if the players top y is more wall top y or player bottom y is less than wall bottom y
+    let downValue = topDown === false ? player.bDown : 5;
+    let playerXPos = (player.bSize * player.bAcross) + (player.vx + player.x);
+    let playerYPos = (player.bSize * downValue) + (player.vy + player.y);
+    let wallXPos = (wall.x - wall.w);
+    let wallYPos = (wall.y - wall.h);
+
+    // top down y
+    let currentPlayerY = (topDown === false) ? player.y : (player.baseTopDownY + player.topDownY);
+    let wallYTop = wall.y;
+    let wallYBottom = wall.y + wall.h;
+    let playerYTop = (player.vy + currentPlayerY);
+    let playerYBottom = (player.vy + currentPlayerY + ((player.bSize * downValue) ));
+
+    console.log((playerYTop > wallYTop && playerYBottom < wallYBottom));
+
+    let yCollision = (topDown === true) ? (playerYTop >= wallYTop && playerYBottom <= wallYBottom) : (playerYTop >= wallYTop || playerYBottom <= wallYBottom);
+    
+    if ( (playerXPos >= wallXPos && playerXPos <= wall.x) && yCollision) {
+      return true;
+    }
+
+    return false;
+  });
+
+  if (hit) {
+    player.vx -=2;
+    cx +=2;
+    console.log('hit')
+  }
+
+  // floors
 
   context.save();
   context.setTransform(1, 0, 0, 1, 0, 0);
@@ -236,33 +297,22 @@ const render = (timestamp) => {
   // build platforms
   if (topDown === false) {
     // paint all these as one?
-    context.fillRect(50, 520, 20, 20);
-    context.fillRect(70, 520, 60, 40);
-    context.fillRect(130, 520, 350, 20);
-    context.fillRect(480, 520, 40, 40);
-    context.fillRect(520, 520, 30, 30);
-    context.fillRect(550, 520, 20, 20);
-    context.fillRect(750, 520, 100, 20);
-    context.fillRect(850, 520, 120, 40);
+    sideLevel.forEach((f) => { context.fillRect(f.x, f.y, f.w, f.h) });
   } else {
-    context.fillRect(50, 200, 500, 200);
-    context.fillRect(750, 200, 220, 200);
+    topDownLevel.forEach((f) => { context.fillRect(f.x, f.y, f.w, f.h) });
   }
 
   // walls 
   context.shadowColor = "#55b958";
   context.fillStyle = '#55b958'
   if (topDown === false) {
-    context.fillRect(300, 320, 30, 200);
-    context.fillRect(820, 500, 30, 20);
+    sideWalls.forEach((f) => { context.fillRect(f.x, f.y, f.w, f.h) });
   } else {
     // the x for walls on top down should be approx 20px closer as our top down sprite is narrower
-    context.fillRect(280, 270, 30, 70);
-    context.fillRect(800, 200, 30, 200);
+    topDownWalls.forEach((f) => { context.fillRect(f.x, f.y, f.w, f.h) });
   }
 
   context.shadowBlur = 0;
-  context.setTransform(1, 0, 0, 1, 0, 0);
 
   if (topDown === false) {
     /* start top left down to bottom right moving from left to right top to bottom */
@@ -291,15 +341,17 @@ const render = (timestamp) => {
     /* for testing top down*/
     let blockSize = player.bSize + (player.vy/20);
 
-    startX = ((5 * blockSize) - blockSize);// - (player.vy/2);
-    startY = (280 + player.topDownY);
+    startX = ((5 * blockSize) - blockSize);
+    startX = (player.bDown * player.bSize) - player.x;
+    startY = (player.baseTopDownY + player.topDownY);
     currentX = startX;
     currentY = startY;
     player.blocksTop.forEach((block, index) => {
 
       if (block !== '0') {
         context.fillStyle = '#'+player.colours[block];
-        context.fillRect( (currentX), currentY, blockSize, blockSize);
+        //context.fillRect( (currentX), currentY, blockSize, blockSize);
+        context.fillRect( (currentX + player.vx), currentY - player.vy, blockSize, blockSize);
       }
 
       if ((index+1) % 5 === 0) {
@@ -311,6 +363,8 @@ const render = (timestamp) => {
       }
     })
   }
+
+  context.setTransform(1, 0, 0, 1, 0, 0);
 
   // glitch it
   //var screen = canvas.toDataURL();
