@@ -157,8 +157,10 @@ let up = 38;
 let down = 40;
 let g = 71;
 let lastKey;
+let keySet = new Set();
 
 document.addEventListener('keydown', (e) => {
+  keySet.add(e.keyCode);
   lastKey = e.keyCode;
   if (e.keyCode === left) {
     dir = -1;
@@ -188,9 +190,11 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('keyup', (e) => {
-  //if (lastKey == left || lastKey == right) {
+  keySet.delete(e.keyCode)
+
+  if (keySet.has(left) === false && keySet.has(right) === false) {
     dir = 0;
-  //}  
+  }
 });
 
 
