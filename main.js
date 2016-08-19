@@ -38,50 +38,47 @@ let player = { x:30, y: 420, baseY: 420, baseTopDownY: 280, topDownY: 0, vx: 0, 
 
 **/
 
-player.blocksMain = [
-  '0','0','p','0','0',
-  '0','0','r','0','0',
-  '0','r','r','r','0',
-  '0','r','p','r','p',
-  '0','0','r','0','0',
-  '0','0','r','0','0',
-  '0','b','b','b','0',
-  '0','b','0','b','0',
-  'b','0','b','0','0',
-  'd','t','d','t','0',
-];
+player.mainFrames = {
+  across: 5,
+  down: 9,
+  current: 0,
+  frames: [
+    '00p0000r000rrr00rprp00r0000r000bbb00b0b0b0b00dtdt0'.split(''),
+    '0000000p0000r000rrr00rprp00r000bbb00b0b0b0b00dtdt0'.split('')
+  ]
+}
 
-player.spriteMain = '5:9:00p0000r000rrr00rprp00r0000r000bbb00b0b0b0b00dtdt0';
-player.spiteDown = '5:9:0000000p0000r000rrr00rprp00r000bbb00b0b0b0b00dtdt0';
-player.spriteWalk = '5:9:0000000p0000r000rrr00rprp00r000bbb0bb0b0d00b0t00dt';
+player.walkFrames = {
+  across: 5,
+  down: 9,
+  current: 0,
+  frames: [
+    '0000000p0000r000rrr00rprp00r000bbb0bb0b0d00b0t00dt'.split(''),
+    '00p0000r000rrr00rprp00r0000r000bbb00b0b0b0b00dtdt0'.split('')
+  ]
+}
 
-player.blocksDown = [
-  '0','0','0','0','0',
-  '0','0','p','0','0',
-  '0','0','r','0','0',
-  '0','r','r','r','0',
-  '0','r','p','r','p',
-  '0','0','r','0','0',
-  '0','b','b','b','0',
-  '0','b','0','b','0',
-  'b','0','b','0','0',
-  'd','t','d','t','0',
-];
+player.downFrames = {
+  across: 5,
+  down: 5,
+  current: 0,
+  frames: [
+    '00rp000rd000p0000rd000rp0'.split(''),
+  ]
+}
 
-player.blocksWalk = [
-  '0','0','0','0','0',
-  '0','0','p','0','0',
-  '0','0','r','0','0',
-  '0','r','r','r','0',
-  '0','r','p','r','p',
-  '0','0','r','0','0',
-  '0','b','b','b','0',
-  'b','b','0','b','0',
-  'd','0','0','b','0',
-  't','0','0','d','t',
-];
+player.downWalkFrames = {
+  across: 5,
+  down: 5,
+  current: 0,
+  frames: [
+    '00rp000rd000p0000rd000rp0'.split(''),
+    '00rp000rd000p0000rd000rp0'.split(''),
+    '00rp000rd000p0000rd000rp0'.split('')
+  ]
+}
 
-/* 4x5 */
+/* 5x5 */
 player.blocksTop = [
   '0' ,'0' ,'r', 'p', '0',
   '0' ,'0' ,'r', 'd', '0',
@@ -135,9 +132,14 @@ let sideLevel = [
   levelBlock(700, 520, 100, 20),
   levelBlock(800, 520, 120, 40)
 ];
+
 let sideWalls = [
   levelBlock(300, 320, 30, 200),
   levelBlock(770, 500, 30, 20)
+];
+
+let sideWallHanging = [
+
 ];
 
 let topDownLevel = [
@@ -200,6 +202,8 @@ document.addEventListener('keyup', (e) => {
 
 let cx = 0;
 let lastTimestamp = null;
+// refactor this silly thing
+let lastTimestampTwo = null
 let tick = false;
 
 const render = (timestamp) => {
@@ -256,8 +260,6 @@ const render = (timestamp) => {
     let playerYTop = (player.vy + currentPlayerY);
     let playerYBottom = (player.vy + currentPlayerY + ((player.bSize * downValue) ));
 
-    console.log((playerYTop > wallYTop && playerYBottom < wallYBottom));
-
     let yCollision = (topDown === true) ? (playerYTop >= wallYTop && playerYBottom <= wallYBottom) : (playerYTop >= wallYTop || playerYBottom <= wallYBottom);
     
     if ( (playerXPos >= wallXPos && playerXPos <= wall.x) && yCollision) {
@@ -283,18 +285,6 @@ const render = (timestamp) => {
 
   context.translate(cx, 0);
 
-  var state;
-
-  if (tick) {
-    state = player.blocksMain;
-  } else {
-    if (dir) {
-      state = player.blocksWalk;
-    } else {
-      state = player.blocksDown;
-    }
-  }
-
   context.shadowBlur = 10;
   context.shadowColor = "#79ef7d";
   context.fillStyle = '#79ef7d';
@@ -309,14 +299,37 @@ const render = (timestamp) => {
   // walls 
   context.shadowColor = "#55b958";
   context.fillStyle = '#55b958'
-  if (topDown === false) {
-    sideWalls.forEach((f) => { context.fillRect(f.x, f.y, f.w, f.h) });
-  } else {
-    // the x for walls on top down should be approx 20px closer as our top down sprite is narrower
-    topDownWalls.forEach((f) => { context.fillRect(f.x, f.y, f.w, f.h) });
-  }
+
+  let wallsToPaint = (topDown === false) ? sideWalls : topDownWalls;
+  wallsToPaint.forEach((f) => { context.fillRect(f.x, f.y, f.w, f.h) });
+  // the x for walls on top down should be approx 20px closer as our top down sprite is narrower MAYBE???
 
   context.shadowBlur = 0;
+
+  var state;
+  var frames;
+
+  if (topDown === false) {
+    if (dir === 0) {
+      frames = player.mainFrames;
+    } else {
+      frames = player.walkFrames;
+    }
+  } else {
+    if (dir === 0) {
+      frames = player.downFrames;
+    } else {
+      frames = player.downWalkFrames;
+    }
+  }
+
+  if (lastTimestampTwo === null || timestamp - lastTimestampTwo >= 500) {
+    lastTimestampTwo = timestamp;
+    frames.current = ( (frames.frames.length - 1) === frames.current) ? 0 : frames.current += 1;
+  }
+
+  state = frames.frames[frames.current];
+
 
   if (topDown === false) {
     /* start top left down to bottom right moving from left to right top to bottom */
