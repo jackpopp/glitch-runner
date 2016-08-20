@@ -78,34 +78,6 @@ player.downWalkFrames = {
   ]
 }
 
-/* 5x5 */
-player.blocksTop = [
-  '0' ,'0' ,'r', 'p', '0',
-  '0' ,'0' ,'r', 'd', '0',
-  '0' ,'0' ,'p', '0', '0',
-  '0' ,'0' ,'r', 'd', '0',
-  '0' ,'0' ,'r', 'p', '0'
-];
-
-player.blocksTopWalkOne = [
-  '0' ,'0' ,'r', 'p', '0',
-  '0' ,'0' ,'r', 'd', '0',
-  '0' ,'0' ,'p', '0', '0',
-  '0' ,'0' ,'r', 'd', '0',
-  '0' ,'0' ,'r', 'p', '0'
-];
-
-player.blocksTopWalkThree = [
-  '0' ,'0' ,'r', 'p', '0',
-  '0' ,'0' ,'r', 'd', '0',
-  '0' ,'0' ,'p', '0', '0',
-  '0' ,'0' ,'r', 'd', '0',
-  '0' ,'0' ,'r', 'p', '0'
-];
-
-//player.blocksTopDown = '2:5:rprdp0rdrp';
-
-
 player.colours = {
   'r': 'a32e2e',
   'b': '2e6fa3',
@@ -123,14 +95,19 @@ player.colours = {
 let levelBlock = (x, y, w, h) => { return { x, y, w, h } }
 
 let sideLevel = [
+
   levelBlock(50, 520, 20, 20),
   levelBlock(70, 520, 60, 40),
   levelBlock(130, 520, 350, 20),
   levelBlock(480, 520, 40, 40),
   levelBlock(520, 520, 30, 30),
   levelBlock(550, 520, 20, 20),
+
   levelBlock(700, 520, 100, 20),
-  levelBlock(800, 520, 120, 40)
+  levelBlock(800, 520, 120, 40),
+
+  levelBlock(850, 520, 120, 40),
+  levelBlock(950, 520, 100, 20) 
 ];
 
 let sideWalls = [
@@ -207,7 +184,9 @@ let lastTimestampTwo = null
 let tick = false;
 
 const render = (timestamp) => {
+
   crt();
+
   if (player.vy <= player.jumpHeight && player.jumping) {
     player.vy+=3
   } 
@@ -237,9 +216,14 @@ const render = (timestamp) => {
     player.vx -=2;
   }
 
-  // collision detection here
-  let walls = (topDown === false) ? sideWalls : topDownWalls;
 
+  /**
+
+    COLLISION DETECTION
+
+  **/
+  let walls = (topDown === false) ? sideWalls : topDownWalls;
+  
   // walls
   let hit = walls.some((wall) => {
     // need front and back
@@ -263,6 +247,7 @@ const render = (timestamp) => {
     let yCollision = (topDown === true) ? (playerYTop >= wallYTop && playerYBottom <= wallYBottom) : (playerYTop >= wallYTop || playerYBottom <= wallYBottom);
     
     if ( (playerXPos >= wallXPos && playerXPos <= wall.x) && yCollision) {
+      console.log(wall);
       return true;
     }
 
@@ -272,10 +257,46 @@ const render = (timestamp) => {
   if (hit) {
     player.vx -=2;
     cx +=2;
-    console.log('hit')
   }
 
-  // floors
+  /**
+
+    CHECK PLAYER ON FLOOR
+
+  **/
+
+  // if player x is not over a wall then drop
+  // get player width if any 
+  // if they all return false we arent on the floor
+  // currently looks a bit weird as there is a 10 pixel buffer due to the size of the frame (maybe minus 10 in the calc)
+  let downValue = topDown === false ? player.bDown : 5;
+  let playerYBottom = (player.y + ((player.bSize * downValue) ));
+
+  let onFloor = sideLevel.some((floor) => {
+    let playerStartX =  /*(player.bSize * player.bAcross) - */(player.vx + player.x);
+    let playerEndX = (player.bSize * player.bAcross) + (player.vx + player.x);
+
+    let floorStartX = floor.x;
+    let floorEndX = floor.x + floor.w;
+    let floorYBottom = floor.y;
+
+    return (floorStartX <= playerEndX && playerStartX <= floorEndX);
+  });
+
+  let playerYBelowFloor = (playerYBottom + 10 + player.vy) <= 520;
+
+  if (onFloor === false && playerYBelowFloor) {
+    player.falling = true;
+    player.jumping = false;
+    player.vy-=20;
+  }
+
+
+  /**
+
+    RENDER GRAPHICS
+
+  **/
 
   context.save();
   context.setTransform(1, 0, 0, 1, 0, 0);
@@ -288,7 +309,13 @@ const render = (timestamp) => {
   context.shadowBlur = 10;
   context.shadowColor = "#79ef7d";
   context.fillStyle = '#79ef7d';
-  // build platforms
+ 
+  /**
+
+    PLATFORMS
+
+  **/
+
   if (topDown === false) {
     // paint all these as one?
     sideLevel.forEach((f) => { context.fillRect(f.x, f.y, f.w, f.h) });
@@ -296,7 +323,12 @@ const render = (timestamp) => {
     topDownLevel.forEach((f) => { context.fillRect(f.x, f.y, f.w, f.h) });
   }
 
-  // walls 
+  /**
+
+    WALLS
+
+  **/
+
   context.shadowColor = "#55b958";
   context.fillStyle = '#55b958'
 
@@ -305,6 +337,18 @@ const render = (timestamp) => {
   // the x for walls on top down should be approx 20px closer as our top down sprite is narrower MAYBE???
 
   context.shadowBlur = 0;
+
+  /**
+
+    PLAYER
+
+  **/
+
+  /**
+
+    PLAYER FRAME
+
+  **/
 
   var state;
   var frames;
@@ -329,6 +373,12 @@ const render = (timestamp) => {
   }
 
   state = frames.frames[frames.current];
+
+  /**
+    
+    RENDER THE PLAYER
+
+  **/
 
 
   if (topDown === false) {
@@ -363,7 +413,7 @@ const render = (timestamp) => {
     startY = (player.baseTopDownY + player.topDownY);
     currentX = startX;
     currentY = startY;
-    player.blocksTop.forEach((block, index) => {
+    state.forEach((block, index) => {
 
       if (block !== '0') {
         context.fillStyle = '#'+player.colours[block];
@@ -382,6 +432,12 @@ const render = (timestamp) => {
   }
 
   context.setTransform(1, 0, 0, 1, 0, 0);
+
+  /**
+
+    GLITCH EFFECT
+
+  **/
 
   // glitch it
   //var screen = canvas.toDataURL();
