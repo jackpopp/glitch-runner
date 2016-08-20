@@ -244,10 +244,9 @@ const render = (timestamp) => {
     let playerYTop = (player.vy + currentPlayerY);
     let playerYBottom = (player.vy + currentPlayerY + ((player.bSize * downValue) ));
 
-    let yCollision = (topDown === true) ? (playerYTop >= wallYTop && playerYBottom <= wallYBottom) : (playerYTop >= wallYTop || playerYBottom <= wallYBottom);
+    let yCollision = (topDown === true) ? (playerYTop >= wallYTop && playerYBottom <= wallYBottom) : (playerYTop <= wallYTop || playerYBottom <= wallYBottom);
     
     if ( (playerXPos >= wallXPos && playerXPos <= wall.x) && yCollision) {
-      console.log(wall);
       return true;
     }
 

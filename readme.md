@@ -3,7 +3,7 @@ To Do
 - [x] - top down switching **kinda done**
 - [ ] - string sprites
 - [x] - collision detection **kinda done**
-- [ ] - fall through floor
+- [x] - fall through floor
 - [ ] - level design
 - [ ] - audio
 - [ ] - parallax background
